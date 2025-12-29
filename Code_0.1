@@ -51,6 +51,14 @@ def new_asteroide():
         ast.vel = (level / 2) * 0.03
         asteroides.append(ast)
 
+def movimento_ast():
+    if mode == "game":
+        for ast in asteroides:
+            dx = planeta.x - ast.x
+            dy = planeta.y - ast.y
+            ast.x += dx * ast.vel
+            ast.y += dy * ast.vel
+
 #---------------------------#
 
 # SETUP INICIAL
@@ -126,12 +134,7 @@ def update(dt):
 
     if mode == "game":
         collisions()
-        
-        for ast in asteroides:
-            dx = planeta.x - ast.x
-            dy = planeta.y - ast.y
-            ast.x += dx * ast.vel
-            ast.y += dy * ast.vel
+        movimento_ast()
 
         if pontos_count >= 20:
             pontos_count -= 20
@@ -155,6 +158,7 @@ def collisions():
     for ast in asteroides:
         if planeta.colliderect(ast):
             asteroides.remove(ast)
+            new_asteroide()
             life -= 1
 
 #---------------------------#
