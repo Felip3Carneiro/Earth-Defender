@@ -1,0 +1,181 @@
+#pgzero
+import random
+
+FPS = 30
+WIDTH = 500
+HEIGHT = 300
+TITLE = "Earth defender"
+
+#---------------------------#
+
+mode = "menu"
+level = 1
+life = 3
+pontos = 0
+pontos_count = 0
+movimento = 2
+botao = 0
+
+#---------------------------#
+
+asteroide_tut = Actor("Asteroid", (250, -200), size=(100, 100))
+
+background = Actor("Back_1", ((WIDTH/2), (HEIGHT/2)), size=(WIDTH, HEIGHT))
+menu = Actor("Menu_1", ((WIDTH/2), (HEIGHT/2)), size=(WIDTH, HEIGHT))
+planeta = Actor("Planet", ((WIDTH/2), 275), size=(75, 75))
+
+butaon_rec = Actor("Recomecar", (350, 250), size = (100, 40))
+butaon = Actor("Normal_1", (250, 150), size=(100, 40))
+cursor_tutorial = Actor("Tutorial", (-100, 100), size=(50, 50))
+
+game_over = Actor("Game_over", planeta.pos)
+
+#---------------------------#
+
+def calma():
+    global botao
+    animate(cursor_tutorial, tween="bounce_end", duration=0.5, pos=asteroide_tut.pos)
+    botao = 1
+
+#---------------------------#
+# LISTA DE ASTEROIDES
+
+asteroides = []
+
+def new_asteroide():
+    if mode == "game":
+        x = random.randint(-100, 600)
+        y = random.randint(-300, 0)
+        
+        ast = Actor("Asteroid", (x, y), size=(100, 100))
+        ast.vel = (level / 2) * 0.03
+        asteroides.append(ast)
+
+#---------------------------#
+
+# SETUP INICIAL
+def setup():
+    for i in range(4):
+        clock.schedule(new_asteroide, 0.4)
+
+setup()
+
+#---------------------------#   
+
+#A PARTE MAIS IMPORTANTE(restart)
+
+def reset():
+    global botao, level, movimento, pontos, life, pontos_count, mode, asteroides
+    life = 3
+    pontos = 0
+    pontos_count = 0
+    asteroides = []
+    level = 0
+    movimento = 2
+    botao = 0
+    mode = "tutorial"  
+    planeta.pos = ((WIDTH/2), 275)
+    asteroide_tut.pos = (250, -200)
+    cursor_tutorial.pos = (-100, 100)
+    setup()
+    
+#---------------------------#
+
+def draw():
+    
+    if mode == "menu":
+        menu.draw()
+        butaon.draw()
+
+    elif mode == "tutorial":
+        background.draw()
+        planeta.draw()
+        asteroide_tut.draw()
+        cursor_tutorial.draw()
+
+        if botao == 1:
+            butaon.draw()
+
+    elif mode == "game":
+        background.draw()
+        planeta.draw()
+        screen.draw.text(str(life), center=(20, 20), color="#DC143C", fontsize=20, background="#FFE4B5")
+        screen.draw.text(str(pontos), center=(400, 20), color="#DC143C", fontsize=20, background="#FFE4B5")
+        screen.draw.text(str(level), center=(250, 20), color="#DC143C", fontsize=20, background="#FFE4B5")
+
+        for ast in asteroides:
+            ast.draw()
+
+    elif mode == "game_over":
+        background.draw()
+        game_over.draw()
+        screen.draw.text("Pontuação final: " + str(pontos),
+                         center=(250, 200), color="#DC143C", fontsize=20, background="#FFE4B5")
+        screen.draw.text("Fase: " + str(level),
+                         center=(250, 250), color="#DC143C", fontsize=20, background="#FFE4B5")
+        butaon_rec.draw()
+
+#---------------------------#
+
+def update(dt):
+    global pontos_count, level, mode, movimento, botao
+
+    if mode == "tutorial":
+        animate(asteroide_tut, tween="decelerate", duration=1, pos=(WIDTH/2, 100))
+        clock.schedule(calma, 1)
+
+    if mode == "game":
+        collisions()
+        
+        for ast in asteroides:
+            dx = planeta.x - ast.x
+            dy = planeta.y - ast.y
+            ast.x += dx * ast.vel
+            ast.y += dy * ast.vel
+
+        if pontos_count >= 20:
+            pontos_count -= 20
+            level += 1
+
+    if level == movimento:
+        if planeta.x >= 450:
+            animate(planeta, tween="linear", duration=3, x=50)
+        else:
+            animate(planeta, tween="linear", duration=3, x=450)
+        movimento += 2
+
+    if life <= 0:
+        mode = "game_over"
+        animate(game_over, tween="decelerate", duration=1, pos=(WIDTH/2, 100))
+
+#---------------------------#
+
+def collisions():
+    global life
+    for ast in asteroides:
+        if planeta.colliderect(ast):
+            asteroides.remove(ast)
+            life -= 1
+
+#---------------------------#
+
+def on_mouse_down(button, pos):
+    global mode, pontos, pontos_count, botao
+
+    if mode == "menu" and butaon.collidepoint(pos) and button == mouse.LEFT:
+        mode = "tutorial"
+        butaon.y = 200
+
+    elif mode == "tutorial" and butaon.collidepoint(pos) and button == mouse.LEFT:
+        mode = "game"
+        schedule_interval(new_asteroide, 0.4)
+        
+    elif mode == "game":
+        for ast in asteroides:
+            if ast.collidepoint(pos):
+                asteroides.remove(ast)
+                pontos += 10
+                pontos_count += 1
+
+    elif mode == "game_over" and butaon_rec.collidepoint(pos):
+        reset()
