@@ -63,10 +63,9 @@ def movimento_ast():
 
 # SETUP INICIAL
 def setup():
-    for i in range(4):
-        clock.schedule(new_asteroide, 0.4)
-
-setup()
+    for i in range(7):
+        tm = random.uniform(0.3, 0.5)
+        clock.schedule(new_asteroide, tm)
 
 #---------------------------#   
 
@@ -85,7 +84,6 @@ def reset():
     planeta.pos = ((WIDTH/2), 275)
     asteroide_tut.pos = (250, -200)
     cursor_tutorial.pos = (-100, 100)
-    setup()
     
 #---------------------------#
 
@@ -172,12 +170,13 @@ def on_mouse_down(button, pos):
 
     elif mode == "tutorial" and butaon.collidepoint(pos) and button == mouse.LEFT:
         mode = "game"
-        schedule_interval(new_asteroide, 0.4)
+        setup()
         
     elif mode == "game":
         for ast in asteroides:
             if ast.collidepoint(pos):
                 asteroides.remove(ast)
+                new_asteroide()
                 pontos += 10
                 pontos_count += 1
 
