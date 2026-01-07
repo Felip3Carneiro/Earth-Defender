@@ -1,4 +1,4 @@
-#pgzero
+0#pgzero
 import random
 
 FPS = 30
