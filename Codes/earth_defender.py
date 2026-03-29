@@ -1,17 +1,18 @@
 #pgzero
+import pgzrun
 import random
 
 #To-do
 #-Balancear o sistema de spawn de asteroides(confia---)(pronto!1!!1)
 #-Arrumar o sistema de bonus(pronto!!!)
-#-Mini-reset depois da fase 5 + aumentar a dificuldade😨(pronto!!!)
+#-Mini-reset depois da fase 5 + aumentar a dificuldade(pronto!!!)
 #-Testar o jogo comigo e depois com a família(confia)
 
-FPS = 30
+#Comando -> python Codes/earth_defender.py
+FPS = 1
 WIDTH = 500
 HEIGHT = 300
 TITLE = "Earth Defender"
-
 # ---------------------------
 # VARIÁVEIS GERAIS
 
@@ -30,16 +31,16 @@ tutorial_agendado = False
 
 # ---------------------------
 # ATORES
+#mudar os nomes para diminutivos depois(pronto!!!)
+asteroide_tut = Actor("asteroid", (250, -200))
+background = Actor("back", (WIDTH / 2, HEIGHT / 2))
+menu = Actor("menu", (WIDTH / 2, HEIGHT / 2))
+planeta = Actor("planet", (WIDTH / 2, 275))
 
-asteroide_tut = Actor("Asteroid", (250, -200), size=(100, 100))
-background = Actor("Back", (WIDTH / 2, HEIGHT / 2), size=(WIDTH, HEIGHT))
-menu = Actor("Menu", (WIDTH / 2, HEIGHT / 2), size=(WIDTH, HEIGHT))
-planeta = Actor("Planet", (WIDTH / 2, 275), size=(75, 75))
-
-butaon = Actor("Comecar", (250, 150), size=(100, 40))
-butaon_rec = Actor("Recomecar", (350, 250), size=(100, 40))
-cursor_tutorial = Actor("Tutorial", (-100, 100), size=(50, 50))
-game_over = Actor("Game_over", planeta.pos)
+butaon = Actor("comecar", (250, 150))
+butaon_rec = Actor("recomecar", (350, 250))
+cursor_tutorial = Actor("tutorial", (-100, 100))
+game_over = Actor("game_over", planeta.pos)
 
 vida = None #Ator da vida(bonus)
 ast = None #Ator do asteroide(inimigo)
@@ -54,7 +55,7 @@ def new_asteroide():
     if mode == "game":
         x = random.randint(50, 450)
         y = random.randint(-300, 0)
-        ast = Actor("Asteroid", (x, y))
+        ast = Actor("asteroid", (x, y))
         
         if level == 5:
             ast.vel = 0.025
@@ -79,7 +80,7 @@ def criar_bonus():
     global vida
     x = random.randint(50, 450)
     y = random.randint(50, 225)
-    vida = Actor("Vida", (x, y), size=(50, 75))
+    vida = Actor("vida", (x, y))
 
 # ---------------------------
 # TUTORIAL
@@ -240,3 +241,5 @@ def on_mouse_down(button, pos):
 
     elif mode == "game_over" and butaon_rec.collidepoint(pos):
         reset()
+
+pgzrun.go()
